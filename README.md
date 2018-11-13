@@ -1,1 +1,3 @@
-# embaskolo
+# Embaskolo
+
+Run main.py
