@@ -116,20 +116,20 @@ class Game:
                 if key[pg.K_l]:
                     hide_debug = 1 ^ hide_debug
 
-                if key[pg.K_g]:
-                    self.camera.zoom = 2
-                    for i, block in enumerate(blocks):
-                        blocks[i].pos.w *= self.camera.zoom
-                        blocks[i].pos.h *= self.camera.zoom
-                    self.player.pos.w *= self.camera.zoom
-                    self.player.pos.h *= self.camera.zoom
-                if key[pg.K_h]:
-                    self.camera.zoom = .5
-                    for i, block in enumerate(blocks):
-                        blocks[i].pos.w *= self.camera.zoom
-                        blocks[i].pos.h *= self.camera.zoom
-                    self.player.pos.w *= self.camera.zoom
-                    self.player.pos.h *= self.camera.zoom
+                # if key[pg.K_g]:
+                    # self.camera.zoom = 2
+                    # for i, block in enumerate(blocks):
+                        # blocks[i].pos.w *= self.camera.zoom
+                        # blocks[i].pos.h *= self.camera.zoom
+                    # self.player.pos.w *= self.camera.zoom
+                    # self.player.pos.h *= self.camera.zoom
+                # if key[pg.K_h]:
+                    # self.camera.zoom = .5
+                    # for i, block in enumerate(blocks):
+                        # blocks[i].pos.w *= self.camera.zoom
+                        # blocks[i].pos.h *= self.camera.zoom
+                    # self.player.pos.w *= self.camera.zoom
+                    # self.player.pos.h *= self.camera.zoom
 
             self.player.update(blocks, self.camera)
 
@@ -137,38 +137,14 @@ class Game:
             for i, block in enumerate(blocks):
                 # blocks[i].draw(self.surface)
                 # pg.draw.rect(self.surface, blocks[i].color, blocks[i].pos)
-                self.camera.draw_rect(self.surface, blocks[i])
+                self.camera.draw_rect(self.surface, blocks[i].color, blocks[i].pos)
                 block.update()
 
             # pg.draw.line(self.surface, BLACK, (0, 300 + 32), (RES[0], 300 + 32))
 
             # self.player.draw(self.surface)
-            self.camera.draw_rect(self.surface, self.player) # Draw player
-            # if self.player.pos.left > int(RES[0] / 2)
-
-            # Have camera follow and center on player
-            self.camera.pos.x = (self.player.pos.x - (RES[0] / 2)) + (self.player.pos.w / 2)
-            # self.camera.pos.y = (self.player.pos.y - (RES[1] / 2)) - (self.player.pos.h / 2)
-
-            # if (self.camera.pos.bottom - 300 < self.player.pos.y < self.camera.pos.top + 300):
-            # If player leaves camera then force camera positon to be at player
-            if not self.camera.pos.colliderect(self.player.pos):
-                self.camera.pos.y = (self.player.pos.y - (RES[1] / 2)) - (self.player.pos.h / 2)
-                self.camera.pos.x = (self.player.pos.x - (RES[0] / 2)) + (self.player.pos.w / 2)
-
-            # If player is lower than 175 pixels from the bottom
-            elif self.player.pos.centery > self.camera.pos.bottom - 175:
-                self.camera.pos.y += self.player.yv + 1
-
-            # If player is highter than 175 pixels from the top
-            elif self.player.pos.centery < self.camera.pos.top + 175:
-                if self.player.yv < -15:
-                    self.camera.pos.y += self.player.yv * .75
-                else:
-                    self.camera.pos.y += self.player.yv - 1
-                # self.camera.pos.y -= 3
-                # self.camera.pos.y = (self.player.pos.y - (RES[1] / 2)) - (self.player.pos.h / 2)
-                # self.camera.pos.y += (self.player.yv + -1 if self.player.yv > 0 else -1) # * 1.1
+            self.camera.draw_rect(self.surface, self.player.color, self.player.pos) # Draw player
+            self.camera.update(self.player)
 
             # self.debug_text({"Wall time": self.player.wall_time,
                              # "On Ground": self.player.on_ground,

@@ -6,7 +6,8 @@ DGRAY = (50, 50, 50)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-RES = (640, 480)
+
+RES = (1280, 720) # (400, 240) # 3ds res # (256, 192) # ds res # (640, 480) # Window size
 
 GRAVITATIONAL_PULL = 2
 MAX_X_VELOCITY = 15 # / 2
