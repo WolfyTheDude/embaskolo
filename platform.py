@@ -3,20 +3,18 @@ import pygame as pg
 import random
 
 class Block:
-    def __init__(self, x, y, length=32, height=32, moves=False, up=False):
+    def __init__(self, x=0, y=0, length=32, height=32, color=50, moves=False, up=False):
         # self.sprite = pg.image.load("block.png")
-        self.shade = random.randint(50, 200)
+        # self.shade = random.randint(50, 200)
+        self.shade = color
         self.shade_up = True
-        self.color = (self.shade, self.shade, self.shade)
-        # self.x = x
-        # self.y = y
-        # self.pos = pg.rect.Rect(x, y + random.randint(1, 50), length, height)  # self.sprite.get_rect()
+        # self.color = (self.shade, self.shade, self.shade)
+        self.color = (color, color, color)
         self.pos = pg.rect.Rect(x, y, length, height)  # self.sprite.get_rect()
         self.xv = 0
-        self.moves = moves
-        # self.moves = True
-        self.up = up
         self.yv = 0
+        self.moves = moves
+        self.up = up
 
     def update(self):
         # Change shading

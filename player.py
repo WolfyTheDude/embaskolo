@@ -1,17 +1,19 @@
 
 from constants import *
+from entity import *
 import pygame as pg
 import random
 import os
 
-class Player():
+class Player(Entity):
     def __init__(self): # , sprite):
+        # super().__init__()
         # self.sprite = sprite
         self.color = (100, 100, 200)
         self.air_time = 0
         self.wall_time = 0
-        self.pos = pg.rect.Rect(0, 0, 32, 32)
-        self.ppos = pg.rect.Rect(0, 0, 32, 32)
+        self.pos = pg.Rect(0, 0, 32, 32)
+        self.ppos = pg.Rect(0, 0, 32, 32)
         self.pposes = [pg.rect.Rect(0, 0, 32, 32)]
         self.yv = 0
         self.xv = 0
@@ -19,7 +21,8 @@ class Player():
         self.on_left_wall = False
         self.on_right_wall = False
         self.can_jump = False
-        self.collide_time = 0
+        self.touch_time = 0
+        self.untouch_time = 0
 
     def update(self, obj, cam):
 
@@ -51,11 +54,11 @@ class Player():
                 self.xv += GROUND_SPEED
             else:
                 self.xv += AIR_SPEED
-        if key[pg.K_r]:
-            self.pos.y = 0
-            self.pos.x = 0 # 200
-            self.xv = 0
-            self.yv = 0
+        # if key[pg.K_r]:
+            # self.pos.y = 0
+            # self.pos.x = 0 # 200
+            # self.xv = 0
+            # self.yv = 0
         if key[pg.K_t]:
             self.pos.y = 300
             self.pos.x = 200
@@ -83,9 +86,16 @@ class Player():
                 if self.on_left_wall and not self.on_ground:
                     self.yv = -20
                     self.xv = 30
+                    self.on_left_wall = False
                 elif self.on_right_wall and not self.on_ground:
                     self.yv = -20
                     self.xv = -30
+                    self.on_right_wall = False
+            # elif not self.on_ground and not key[pg.K_a] and not key[pg.K_d]:
+                # if self.xv > 0:
+                    # self.xv += AIR_SPEED
+                # elif self.xv < 0:
+                    # self.xv -= AIR_SPEED
 
         # Previous position
         self.pposes = [pg.Rect(self.pos.x, self.pos.y, self.pos.w, self.pos.h)]
@@ -124,20 +134,35 @@ class Player():
 
         # if self.pos.y == self.ppos.y: self.yv = 0 # Del?
 
+
+        # if self.untouch_time >= 1:
+            # self.on_right_wall = False
+            # self.on_left_wall = False
+        # Set the following to False, the collision check after
+        # will can set any of thse to True if need be
         self.on_right_wall = False
         self.on_left_wall = False
         self.on_ground = False
 
+        # Check collision against obj if obj[X] is in view of camera
         self.check_collision(obj, cam)
 
-        if self.on_ground:
-            self.can_jump = True
+        # If on wall, latch on wall
+        if self.on_left_wall and self.air_time > 10: # not self.on_ground:
+            self.xv -= 1
+            self.yv *= .8
+        elif self.on_right_wall and self.air_time > 10:# not self.on_ground:
+            self.xv += 1
+            self.yv *= .8
 
-        if not self.on_ground:
-            self.air_time += 1
-        else:
-            self.air_time = 0
+        # Only if you're on the ground can you jump
+        if self.on_ground: self.can_jump = True
 
+        # air_time increases if player not on ground else air_time will reset
+        if not self.on_ground: self.air_time += 1
+        else: self.air_time = 0
+
+        # wall_time increases if on_left_wall or on_right_wall else rest
         if self.on_right_wall or self.on_left_wall and \
            self.air_time > 5 and not self.on_ground:
             self.wall_time += 1
@@ -164,32 +189,37 @@ class Player():
                     if self.pos.topright[0] == objects.pos.bottomleft[0] and \
                     self.pos.topright[1] == objects.pos.bottomleft[1]:
                         self.pos.y -= self.pos.top - objects.pos.bottom
-                        self.pos.x += 1
+                        if self.xv > 0:
+                            self.pos.x += 1
+                        objects.color = BLUE
 
                     # if player came from bottom right
                     elif self.pos.topleft[0] == objects.pos.bottomright[0] and \
                     self.pos.topleft[1] == objects.pos.bottomright[1]:
                         self.pos.y -= self.pos.top - objects.pos.bottom
-                        self.pos.x -= 1
+                        if self.xv < 0:
+                            self.pos.x -= 1
+                        objects.color = BLUE
 
                     # if player came from top right
                     elif self.pos.bottomleft[0] == objects.pos.topright[0] and \
                     self.pos.bottomleft[1] == objects.pos.topright[1]:
                         # self.pos.y -= self.pos.top - objects.pos.bottom
-                        self.pos.x -= 1
+                        if self.xv < 0:
+                            self.pos.x -= 1
 
                     # if player came from top left
                     elif self.pos.bottomright[0] == objects.pos.topleft[0] and \
                     self.pos.bottomright[1] == objects.pos.topleft[1]:
                         # self.pos.y -= self.pos.top - objects.pos.bottom
-                        self.pos.x += 1
+                        if self.xv > 0:
+                            self.pos.x += 1
 
                     elif self.ppos.bottom <= objects.pos.top - objects.yv: # if player came from above
                     # if self.yv > 0:
                         # self.pos.y -= self.pos.bottom - objects.pos.top
                         # if objects.yv != 0:
 
-                        # objects.color = BLUE
                         if objects.yv < 0:
                             self.pos.bottom = objects.pos.top
                         elif objects.yv > 0:
@@ -204,32 +234,31 @@ class Player():
                         # elif objects.moves:
                             # self.pos.x += objects.xv # objects.xv # + ((objects.xv * .99) / .99) # + 5
 
-                    elif self.ppos.top >= objects.pos.bottom: # if player came from below
-                    # elif self.yv < 0:
-                        # self.pos.y -= self.pos.top - objects.pos.bottom
-                        self.pos.top = objects.pos.bottom
-                        self.yv = 0
-                        # Bumping your head at a high speed will slow you down
-                        if self.xv > 10:
-                            self.xv /= 2
-                        self.can_jump = False
-
                     elif self.ppos.right <= objects.pos.left: # if player came from left
                     # elif self.xv > 0:
-                        # self.pos.x -= self.pos.right - objects.pos.left
-                        self.pos.right = objects.pos.left
+                        self.pos.x -= self.pos.right - objects.pos.left
+                        # self.pos.right = objects.pos.left
                         self.xv = 0
                         self.on_right_wall = True
-                        # if objects.moves:
 
                     elif self.ppos.left >= objects.pos.right: # if player came from right
                     # elif self.xv < 0:
-                        # self.pos.x -= self.pos.left - objects.pos.right
-                        self.pos.left = objects.pos.right
-                        self.xv = 0
+                        self.pos.x -= self.pos.left - objects.pos.right
+                        # self.pos.left = objects.pos.right
+                        if not (self.ppos.top >= objects.pos.bottom): # if player came from below
+                            self.xv = 0
                         self.on_left_wall = True
-                        # if objects.moves:
-                            # self.xv = objects.xv
+
+                    elif self.ppos.top >= objects.pos.bottom: # if player came from below
+                    # elif self.yv < 0:
+                        self.pos.y -= self.pos.top - objects.pos.bottom
+                        # self.pos.top = objects.pos.bottom
+                        self.yv = 0
+                        # Bumping your head at a high speed will slow you down
+                        # if self.xv > 10:
+                            # self.xv /= 2
+                        self.can_jump = False
+
                     # if abs(objects.xv) > abs(self.xv):
                     # if -3 < self.xv < 3:
                     # if self.xv == 0:
@@ -239,10 +268,13 @@ class Player():
                     # if objects.xv != 0:
                         # self.pos.x += objects.xv
 
+
         if has_collided:
-            self.collide_time += 1
+            self.touch_time += 1
+            self.untouch_time = 0
         else:
-            self.collide_time = 0
+            self.untouch_time += 1
+            self.touch_time = 0
 
             """
             while self.pos.colliderect(objects.pos):

@@ -10,17 +10,27 @@ class Camera:
 
     def update(self, player):
             # Have camera follow and center on player
-            self.pos.x = (player.pos.x - (RES[0] / 2)) + (player.pos.w / 2)
+            # self.pos.x = (player.pos.x - (RES[0] / 2)) + (player.pos.w / 2)
             # self.pos.y = (player.pos.y - (RES[1] / 2)) - (player.pos.h / 2)
 
             # if (self.pos.bottom - 300 < player.pos.y < self.pos.top + 300):
             # If player leaves camera then force camera positon to be at player
-            if not self.pos.colliderect(player.pos):
-                self.pos.y = (player.pos.y - (RES[1] / 2)) - (player.pos.h / 2)
-                self.pos.x = (player.pos.x - (RES[0] / 2)) + (player.pos.w / 2)
+            # if not self.pos.colliderect(player.pos):
+            self.pos.y = (player.pos.y - (RES[1] / 2)) - (player.pos.h / 2)
+            self.pos.x = (player.pos.x - (RES[0] / 2)) + (player.pos.w / 2)
 
+            """
+            # Have camera follow horizontally
+            if player.pos.centerx > self.pos.right - RES[1] * .564:
+                self.pos.x += player.xv + 1
+
+            # If player is highter than 36.4% pixels from the top
+            elif player.pos.centerx < self.pos.left + RES[1] * .564:
+                self.pos.x += player.xv * .75
+
+            # Have camera follow vertically
             # If player is lower than 36.4% pixels from the bottom
-            elif player.pos.centery > self.pos.bottom - RES[1] * .364: # 175
+            if player.pos.centery > self.pos.bottom - RES[1] * .364: # 175
                 self.pos.y += player.yv + 1
 
             # If player is highter than 36.4% pixels from the top
@@ -28,15 +38,26 @@ class Camera:
                 if player.yv < -15:
                     self.pos.y += player.yv * .75
                 else:
-                    self.pos.y += player.yv - 1
+                    self.pos.y += player.yv - 2
+
+                # self.pos.y += 1
                 # self.pos.y = (player.pos.y - (RES[1] / 2)) - (player.pos.h / 2)
                 # self.pos.y += (player.yv + -1 if player.yv > 0 else -1) # * 1.1
+            """
 
-    def draw(self, surface, obj):
+    def draw(self, surface, obj, color=BLACK):
+        if obj is type(pg.Rect):
+            if self.pos.colliderect(rect):
+                pg.draw.rect(surface, color, self.apply_offset(rect))
+                # self.draw_rect(surface, obj)
+        elif hasattr(obj, "sprite"):
+            surface.blit(obj.sprite)
+
+    def draw_sprite(self, surface, obj):
         surface.blit(obj.sprite)
-        surface.blit(pg.Rect(obj.pos.x + self.pos.x,
-                             obj.pos.y + self.pos.y,
-                             obj.width, obj.height))
+        # surface.blit(pg.Rect(obj.pos.x + self.pos.x,
+                             # obj.pos.y + self.pos.y,
+                             # obj.width, obj.height))
 
     def apply_offset(self, rect):
                 return pg.Rect(

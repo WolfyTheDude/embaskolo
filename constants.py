@@ -8,6 +8,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
 RES = (1280, 720) # (400, 240) # 3ds res # (256, 192) # ds res # (640, 480) # Window size
+FPS = 30
 
 GRAVITATIONAL_PULL = 2
 MAX_X_VELOCITY = 15 # / 2
